@@ -7,7 +7,7 @@ import java.sql.SQLException
 
 class DataBase(private val plugin:JavaPlugin) {
 
-    //  Connect information
+    //  接続設定
     private var host: String? = null
     private var user: String? = null
     private var pass: String? = null
@@ -15,20 +15,15 @@ class DataBase(private val plugin:JavaPlugin) {
     private var db: String? = null
 
     init {
-        //  Logger
-        plugin.logger.info("DataBaseを読み込みます。")
-        //  load config
+        plugin.logger.info("データベースを読み込みます。")
         loadConfig()
-        //  クラスローダー
         loadClass()
-        //  Test Connect
         testConnect()
-        //  Logger
-        plugin.logger.info("DataBaseを読み込みました。")
+        plugin.logger.info("データベースを読み込みました。")
     }
 
     /**
-     * DBへの接続設定を読み込みます。
+     * データベースへの接続設定を読み込みます。
      */
     fun loadConfig() {
         host = plugin.config.getString("database.host")
@@ -41,40 +36,35 @@ class DataBase(private val plugin:JavaPlugin) {
     private fun loadClass() {
         try {
             Class.forName("org.mariadb.jdbc.Driver")
-            plugin.logger.info("Load class.")
+            plugin.logger.info("クラスを読み込みました")
         } catch (e: ClassNotFoundException) {
             e.printStackTrace()
-            plugin.logger.info("DataBase connection class not found!")
         }
     }
 
     /**
-     * MariaDBのコネクション取得function
-     * @return Connection
+     * MariaDBの [Connection] を取得します
+     * @return [Connection]
      */
     fun getConnection(): Connection? {
-        val connection: Connection
-        connection = try {
+        return try {
             DriverManager.getConnection("jdbc:mariadb://$host:$port/$db", user, pass)
         } catch (e: SQLException) {
             e.printStackTrace()
             return null
         }
-        return connection
     }
 
     /**
      * MariaDBへの接続をテストします。
-     * 成功:true 失敗:false
-     * @return Boolean
+     * @return [Boolean] 成功: true / 失敗: false
      */
-    private fun testConnect(): Boolean? {
-        plugin.logger.info("接続テスト中....")
-        if (getConnection() == null) {
+    private fun testConnect() {
+        plugin.logger.info("接続テスト中...")
+        if (getConnection() != null) {
+            plugin.logger.info("接続に成功しました！")
+        } else {
             plugin.logger.info("接続に失敗しました。")
-            return false
         }
-        plugin.logger.info("接続に成功しました！")
-        return true
     }
 }

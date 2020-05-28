@@ -9,13 +9,9 @@ class Main:JavaPlugin() {
     }
 
     override fun onEnable() {
-        //  Logger
         logger.info("load DataBase class...")
-        //  Config
         this.saveDefaultConfig()
-        //  class
         dataBase = DataBase(this)
-        //  Logger
         logger.info("complete load class!")
     }
 }
