@@ -4,77 +4,92 @@ import org.bukkit.plugin.java.JavaPlugin
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
+import java.sql.Statement
 
-class DataBase(private val plugin:JavaPlugin) {
-
-    //  Connect information
+class DataBase(private val plugin: JavaPlugin) {
+    //  接続設定
     private var host: String? = null
     private var user: String? = null
-    private var pass: String? = null
+    private var password: String? = null
     private var port: String? = null
-    private var db: String? = null
+    private var databaseName: String? = null
+
+    var isAvailable = false
 
     init {
-        //  Logger
-        plugin.logger.info("DataBaseを読み込みます。")
-        //  load config
+        plugin.logger.info("データベースを読み込みます。")
         loadConfig()
-        //  クラスローダー
         loadClass()
-        //  Test Connect
         testConnect()
-        //  Logger
-        plugin.logger.info("DataBaseを読み込みました。")
+        plugin.logger.info("データベースを読み込みました。")
     }
 
     /**
-     * DBへの接続設定を読み込みます。
+     * データベースへの接続設定を読み込みます。
      */
     fun loadConfig() {
-        host = plugin.config.getString("database.host")
-        user = plugin.config.getString("database.user")
-        pass = plugin.config.getString("database.pass")
-        port = plugin.config.getString("database.port")
-        db = plugin.config.getString("database.db")
+        val config = plugin.config
+        host = config.getString("database.host")
+        user = config.getString("database.user")
+        password = config.getString("database.pass")
+        port = config.getString("database.port")
+        databaseName = config.getString("database.db")
     }
 
     private fun loadClass() {
         try {
             Class.forName("org.mariadb.jdbc.Driver")
-            plugin.logger.info("Load class.")
+            plugin.logger.info("クラスを読み込みました")
         } catch (e: ClassNotFoundException) {
             e.printStackTrace()
-            plugin.logger.info("DataBase connection class not found!")
         }
     }
 
     /**
-     * MariaDBのコネクション取得function
-     * @return Connection
+     * MariaDBの [Connection] を取得します
+     * @return [Connection]
      */
     fun getConnection(): Connection? {
-        val connection: Connection
-        connection = try {
-            DriverManager.getConnection("jdbc:mariadb://$host:$port/$db", user, pass)
+        return try {
+            DriverManager.getConnection("jdbc:mariadb://$host:$port/$databaseName", user, password)
         } catch (e: SQLException) {
             e.printStackTrace()
-            return null
+            null
         }
-        return connection
+    }
+
+    /**
+     * [Connection] を取得し、処理終了後に自動で閉じます
+     * @param run [Connection] に対して実行する処理
+     * @param R 処理の戻り値
+     * @return [R]?
+     */
+    inline fun <R> useConnection(run: Connection.() -> R): R? {
+        return getConnection()?.use(run)
+    }
+
+    /**
+     * [Statement] を取得し、処理終了後に自動で閉じます
+     * @param run [Statement] に対して実行する処理
+     * @param R 処理の戻り値
+     * @return [R]?
+     */
+    inline fun <R> useStatement(run: Statement.() -> R): R? {
+        return useConnection { createStatement().use(run) }
     }
 
     /**
      * MariaDBへの接続をテストします。
-     * 成功:true 失敗:false
-     * @return Boolean
+     * @return [Boolean] 成功: true / 失敗: false
      */
-    private fun testConnect(): Boolean? {
-        plugin.logger.info("接続テスト中....")
-        if (getConnection() == null) {
+    private fun testConnect() {
+        plugin.logger.info("接続テスト中...")
+        isAvailable = if (useConnection { } != null) {
+            plugin.logger.info("接続に成功しました！")
+            true
+        } else {
             plugin.logger.info("接続に失敗しました。")
-            return false
+            false
         }
-        plugin.logger.info("接続に成功しました！")
-        return true
     }
 }
