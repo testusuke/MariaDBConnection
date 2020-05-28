@@ -22,9 +22,9 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation("com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT")
-    compile fileTree(dir: 'libs', include: '*.jar')
+    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compile("org.mariadb.jdbc:mariadb-java-client:2.6.0")
 }
 
 compileKotlin {
