@@ -4,6 +4,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
+import java.sql.Statement
 
 class DataBase(private val plugin: JavaPlugin) {
 
@@ -57,12 +58,32 @@ class DataBase(private val plugin: JavaPlugin) {
     }
 
     /**
+     * [Connection] を取得し、処理終了後に自動で閉じます
+     * @param run [Connection] に対して実行する処理
+     * @param R 処理の戻り値
+     * @return [R]?
+     */
+    inline fun <R> useConnection(run: Connection.() -> R): R? {
+        return getConnection()?.use(run)
+    }
+
+    /**
+     * [Statement] を取得し、処理終了後に自動で閉じます
+     * @param run [Statement] に対して実行する処理
+     * @param R 処理の戻り値
+     * @return [R]?
+     */
+    inline fun <R> useStatement(run: Statement.() -> R): R? {
+        return useConnection { createStatement().use(run) }
+    }
+
+    /**
      * MariaDBへの接続をテストします。
      * @return [Boolean] 成功: true / 失敗: false
      */
     private fun testConnect() {
         plugin.logger.info("接続テスト中...")
-        if (getConnection() != null) {
+        if (useConnection { } != null) {
             plugin.logger.info("接続に成功しました！")
         } else {
             plugin.logger.info("接続に失敗しました。")
