@@ -5,7 +5,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
 
-class DataBase(private val plugin:JavaPlugin) {
+class DataBase(private val plugin: JavaPlugin) {
 
     //  接続設定
     private var host: String? = null
@@ -26,11 +26,12 @@ class DataBase(private val plugin:JavaPlugin) {
      * データベースへの接続設定を読み込みます。
      */
     fun loadConfig() {
-        host = plugin.config.getString("database.host")
-        user = plugin.config.getString("database.user")
-        pass = plugin.config.getString("database.pass")
-        port = plugin.config.getString("database.port")
-        db = plugin.config.getString("database.db")
+        val config = plugin.config
+        host = config.getString("database.host")
+        user = config.getString("database.user")
+        pass = config.getString("database.pass")
+        port = config.getString("database.port")
+        db = config.getString("database.db")
     }
 
     private fun loadClass() {
@@ -51,7 +52,7 @@ class DataBase(private val plugin:JavaPlugin) {
             DriverManager.getConnection("jdbc:mariadb://$host:$port/$db", user, pass)
         } catch (e: SQLException) {
             e.printStackTrace()
-            return null
+            null
         }
     }
 
