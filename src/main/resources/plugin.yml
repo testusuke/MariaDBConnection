@@ -1,0 +1,5 @@
+name: MariaDBConnection
+main: net.testusuke.api.mariadb.Main
+version: 1.0
+api-version: 1.15
+author: testusuke
