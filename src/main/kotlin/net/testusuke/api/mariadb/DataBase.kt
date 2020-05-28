@@ -7,13 +7,14 @@ import java.sql.SQLException
 import java.sql.Statement
 
 class DataBase(private val plugin: JavaPlugin) {
-
     //  接続設定
     private var host: String? = null
     private var user: String? = null
-    private var pass: String? = null
+    private var password: String? = null
     private var port: String? = null
-    private var db: String? = null
+    private var databaseName: String? = null
+
+    var isAvailable = false
 
     init {
         plugin.logger.info("データベースを読み込みます。")
@@ -30,9 +31,9 @@ class DataBase(private val plugin: JavaPlugin) {
         val config = plugin.config
         host = config.getString("database.host")
         user = config.getString("database.user")
-        pass = config.getString("database.pass")
+        password = config.getString("database.pass")
         port = config.getString("database.port")
-        db = config.getString("database.db")
+        databaseName = config.getString("database.db")
     }
 
     private fun loadClass() {
@@ -50,7 +51,7 @@ class DataBase(private val plugin: JavaPlugin) {
      */
     fun getConnection(): Connection? {
         return try {
-            DriverManager.getConnection("jdbc:mariadb://$host:$port/$db", user, pass)
+            DriverManager.getConnection("jdbc:mariadb://$host:$port/$databaseName", user, password)
         } catch (e: SQLException) {
             e.printStackTrace()
             null
@@ -83,10 +84,12 @@ class DataBase(private val plugin: JavaPlugin) {
      */
     private fun testConnect() {
         plugin.logger.info("接続テスト中...")
-        if (useConnection { } != null) {
+        isAvailable = if (useConnection { } != null) {
             plugin.logger.info("接続に成功しました！")
+            true
         } else {
             plugin.logger.info("接続に失敗しました。")
+            false
         }
     }
 }
