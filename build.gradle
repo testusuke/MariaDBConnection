@@ -1,10 +1,10 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.72'
+    id "net.minecrell.plugin-yml.bukkit" version "0.3.0"
 }
 
 group 'net.testusuke'
 version '1.0-SNAPSHOT'
-
 
 repositories {
     mavenCentral()
@@ -21,6 +21,14 @@ dependencies {
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+bukkit {
+    name = project.name
+    version = project.version.toString()
+    main = group.toString() + ".Main"
+    author = "testusuke"
+    apiVersion = "1.15"
 }
 
 jar {
